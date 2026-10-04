@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>星载中继通道冗余配对复核</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>星载中继通道冗余配对复核</h1>
+    <p class="subtitle">
+      故障通道切除后，对剩余通道做一般图（非二分图）完美匹配复核。
+      计算在 Web Worker 内按 Edmonds 缩花算法执行。
+    </p>
+  </header>
+
+  <main>
+    <section class="input-panel" aria-label="输入区">
+      <div class="field">
+        <label for="channels">通道标识（每行一个，3–48 个，数量须为偶数）</label>
+        <textarea id="channels" rows="8" spellcheck="false"
+          placeholder="CH-A01&#10;CH-A02&#10;CH-B01&#10;CH-B02"></textarea>
+        <div class="hint" id="channelCount"></div>
+      </div>
+      <div class="field">
+        <label for="edges">无向兼容边（每行两个通道标识，空格、逗号或 -- 分隔）</label>
+        <textarea id="edges" rows="8" spellcheck="false"
+          placeholder="CH-A01 CH-A02&#10;CH-A01 -- CH-B01"></textarea>
+        <div class="hint">自环、重复边、未知端点均会被拒绝。</div>
+      </div>
+      <div class="actions">
+        <button id="checkBtn" type="button">复核</button>
+        <button id="sampleOkBtn" type="button" class="secondary">填入示例：可完美配对（含奇环）</button>
+        <button id="sampleFailBtn" type="button" class="secondary">填入示例：无法完整配对</button>
+        <button id="clearBtn" type="button" class="secondary">清空</button>
+      </div>
+      <div id="workerStatus" class="worker-status" role="status"></div>
+    </section>
+
+    <section class="result-panel" aria-live="polite">
+      <div id="placeholder" class="placeholder">点击「复核」后在此查看覆盖全部通道的配对，或阻止完整配对的通道集合证书。</div>
+
+      <div id="resultBox" class="result-box" hidden>
+        <div id="summary" class="summary"></div>
+        <div id="errors" class="errors" hidden></div>
+
+        <div id="successView" hidden>
+          <h2>配对结果（覆盖全部通道，按通道标识排序）</h2>
+          <table class="pairs-table">
+            <thead><tr><th>#</th><th>通道 ①</th><th>通道 ②</th></tr></thead>
+            <tbody id="pairsBody"></tbody>
+          </table>
+        </div>
+
+        <div id="failureView" hidden>
+          <h2>无完美匹配：Tutte 失败证书</h2>
+          <p class="cert-intro">
+            移除下列通道集合 <strong>S</strong> 后，原图剩余部分产生的奇数连通分量数量
+            <strong>严格大于</strong> |S|。依据 Tutte 定理，图中不存在覆盖全部通道的配对，
+            因此该孤立通道无法安置。证书中每个分量与其通向 S 的边均可对照原图逐项核对。
+          </p>
+          <div class="cert-meta">
+            <span>移除集合 |S| = <strong id="sSize"></strong></span>
+            <span>奇数连通分量数 q(S) = <strong id="oddCount"></strong></span>
+            <span class="inequality" id="inequality"></span>
+          </div>
+          <div class="cert-block">
+            <h3>移除集合 S</h3>
+            <ul id="sList" class="chip-list"></ul>
+          </div>
+          <div class="cert-block">
+            <h3>移除 S 后的奇数连通分量</h3>
+            <div id="oddComponents"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>Edmonds 缩花 · 一般图完美匹配</span>
+    <span id="healthFlag"></span>
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

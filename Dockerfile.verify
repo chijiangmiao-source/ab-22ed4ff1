@@ -1,0 +1,16 @@
+# verify 单次服务镜像：实际运行匹配规则测试、页面构建与 HTTP 冒烟，
+# 以退出码表达结果（0 成功 / 非 0 失败），不启动常驻服务。
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package.json ./
+COPY src ./src
+COPY test ./test
+COPY scripts ./scripts
+COPY server.mjs ./
+
+# 构建在 verify 流程内执行一次（npm run verify 含 build）；此处预构建可提前暴露镜像层问题
+RUN node scripts/build.mjs
+
+ENTRYPOINT ["npm", "run", "verify"]

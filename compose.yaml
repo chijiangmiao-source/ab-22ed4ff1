@@ -1,0 +1,29 @@
+services:
+  web:
+    build: .
+    image: relay-channel-matching:latest
+    container_name: relay-channel-matching
+    environment:
+      # 容器内固定监听 8080；宿主端口可配置（.env 或导出 HOST_PORT）
+      HOST: 0.0.0.0
+      PORT: "8080"
+    ports:
+      # 可配置宿主端口：默认 8080，通过 .env 的 HOST_PORT 修改
+      - "${HOST_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 3s
+    restart: unless-stopped
+
+  # 单次校验服务：实际运行匹配规则测试、页面构建与本题输入的 HTTP 冒烟，
+  # 完成后以退出码结束（exit 0 通过 / 非 0 失败）。
+  verify:
+    build: .
+    image: relay-channel-matching:latest
+    container_name: relay-channel-matching-verify
+    command: ["sh", "-c", "node --test test/ && node scripts/build.js && PORT=0 HOST=127.0.0.1 node scripts/smoke.js"]
+    # verify 为单次任务：不映射宿主端口、不自动重启，以自身退出码结束
+    restart: "no"

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>星载中继通道冗余配对复核</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header>
+  <h1>星载中继通道冗余配对复核</h1>
+  <p class="subtitle">
+    切除故障通道后，按无向兼容关系为剩余设备寻找<strong>覆盖全部通道的两两配对</strong>。
+    计算在 Web Worker 中按<strong>一般图（非二分图）</strong>语义执行 Edmonds 缩花算法；
+    无法配对时给出可凭原图逐项核对的 Tutte 失败证书。
+  </p>
+</header>
+
+<main>
+  <section class="input-card">
+    <div class="field">
+      <label for="channels">通道标识（3–48 个、唯一、总数为偶数；空白或逗号分隔）</label>
+      <textarea id="channels" rows="4" spellcheck="false"
+        placeholder="CH-01 CH-02 CH-03 CH-04&#10;或：CH-01, CH-02, CH-03, CH-04"></textarea>
+    </div>
+    <div class="field">
+      <label for="edges">无向兼容边（每行两个通道标识，表示二者可互相接管）</label>
+      <textarea id="edges" rows="9" spellcheck="false"
+        placeholder="CH-01 CH-02&#10;CH-02 CH-03&#10;CH-03 CH-04"></textarea>
+    </div>
+    <div class="toolbar">
+      <button id="run" type="button" class="primary">复核配对</button>
+      <button id="sample" type="button">载入失败证书示例（星型 K₁,₃）</button>
+      <button id="sample-blossom" type="button">载入缩花成功示例（双三角花）</button>
+      <button id="clear" type="button">清空</button>
+    </div>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+    <div id="errors"></div>
+  </section>
+
+  <section id="result" class="result-card" hidden>
+    <div id="result-head"></div>
+    <div id="result-body"></div>
+  </section>
+
+  <section class="rules-card">
+    <h2>校验规则</h2>
+    <ul>
+      <li>通道须为 3–48 个<strong>唯一标识</strong>，且总数为<strong>偶数</strong>；</li>
+      <li>拒绝<strong>自环</strong>、<strong>重复边</strong>、含<strong>未知端点</strong>的边；</li>
+      <li>拒绝<strong>空边图</strong>（没有任何兼容边时偶数个孤立通道无法配对）；</li>
+      <li>成功：配对覆盖全部通道，每对均为录入边，按通道标识升序稳定展示；</li>
+      <li>失败：展示移除集合 S 与 S 删除后的每个奇数连通分量，奇数分量数<strong>严格大于</strong> |S|，并可对照原图逐项核对；</li>
+      <li>任何失败提交都会清空上一次通过的配对，不保留旧结果。</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <span>Edmonds blossom matching · Tutte–Berge certificate · Web Worker</span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

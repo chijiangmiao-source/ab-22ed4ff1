@@ -1,0 +1,17 @@
+{
+  "name": "relay-channel-matching",
+  "version": "1.0.0",
+  "private": true,
+  "description": "星载中继通道冗余配对复核：一般图 Edmonds 缩花完美匹配与 Tutte 失败证书",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test test/",
+    "build": "node scripts/build.js",
+    "start": "node scripts/server.js",
+    "smoke": "node scripts/smoke.js",
+    "verify": "npm run test && npm run build && node scripts/smoke.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
